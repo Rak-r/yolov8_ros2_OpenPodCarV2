@@ -13,18 +13,6 @@ $ rosdep install --from-paths src --ignore-src -r -y
 $ colcon build
 ```
 
-## Usage
-
-### YOLOv8
-
-```shell
-$ ros2 launch yolov8_bringup yolov8.launch.py
-```
-
-<p align="center">
-  <img src="./docs/rqt_graph_yolov8.png" width="100%" />
-</p>
-
 #### Topics
 
 - **/yolo/detections**: Objects detected by YOLO using the RGB images. Each object contains a bounding boxes and a class name. It may also include a mak or a list of keypoints.
