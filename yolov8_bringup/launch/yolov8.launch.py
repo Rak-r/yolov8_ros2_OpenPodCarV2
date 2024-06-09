@@ -14,6 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
@@ -28,7 +29,7 @@ def generate_launch_description():
     model = LaunchConfiguration("model")
     model_cmd = DeclareLaunchArgument(
         "model",
-        default_value="/home/rakshit/yolov8n.pt",
+        default_value="yolov8n.pt",                                       # use the nano mode to reduce the computational load
         description="Model name or path")
 
     tracker = LaunchConfiguration("tracker")
@@ -104,17 +105,6 @@ def generate_launch_description():
         remappings=[("image_raw", input_image_topic)]
     )
 
-    # debug_node_cmd = Node(
-    #     package="yolov8_ros",
-    #     executable="debug_node",
-    #     name="debug_node",
-    #     namespace=namespace,
-    #     parameters=[{"image_reliability": image_reliability}],
-    #     remappings=[
-    #         ("image_raw", input_image_topic),
-    #         ("detections", "tracking")
-    #     ]
-    # )
 
     ld = LaunchDescription()
 
@@ -129,6 +119,6 @@ def generate_launch_description():
 
     ld.add_action(detector_node_cmd)
     ld.add_action(tracking_node_cmd)
-    # ld.add_action(debug_node_cmd)
+    
 
     return ld

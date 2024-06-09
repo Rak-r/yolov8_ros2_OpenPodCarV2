@@ -6,7 +6,7 @@ ROS 2 wrap for [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) 
 
 ```shell
 $ cd ~/ros2_ws/src
-$ git clone https://github.com/mgonzs13/yolov8_ros.git
+$ git clone https://github.com/Rak-r/yolov8_ros2_OpenPodCarV2.git
 $ pip3 install -r yolov8_ros/requirements.txt
 $ cd ~/ros2_ws
 $ rosdep install --from-paths src --ignore-src -r -y
@@ -15,14 +15,10 @@ $ colcon build
 
 ## Usage
 
-### YOLOv8 / YOLOv9
+### YOLOv8
 
 ```shell
 $ ros2 launch yolov8_bringup yolov8.launch.py
-```
-
-```shell
-$ ros2 launch yolov8_bringup yolov9.launch.py
 ```
 
 <p align="center">
@@ -45,19 +41,11 @@ $ ros2 launch yolov8_bringup yolov9.launch.py
 - **input_image_topic**: Camera topic of RGB images (default: /camera/rgb/image_raw)
 - **image_reliability**: Reliability for the image topic: 0=system default, 1=Reliable, 2=Best Effort (default: 2)
 
-### YOLOv8 3D
 
-```shell
-$ ros2 launch yolov8_bringup yolov8_3d.launch.py
-```
-
-<p align="center">
-  <img src="./docs/rqt_graph_yolov8_3d.png" width="100%" />
-</p>
 
 #### Topics
 
-- **/yolo/detections**: Objects detected by YOLO using the RGB images. Each object contains a bounding boxes and a class name. It may also include a mak or a list of keypoints.
+- **/yolo/detections**: Objects detected by YOLO using the RGB images. Each object contains a bounding boxes and a class name. It may also include a mask or a list of keypoints.
 - **/yolo/tracking**: Objects detected and tracked from YOLO results. Each object is assigned a tracking ID.
 - **/yolo/detections_3d**: 3D objects detected. YOLO results are used to crop the depth images to create the 3D bounding boxes and 3D keypoints.
 - **/yolo/debug_image**: Debug images showing the detected and tracked objects. They can be visualized with rviz2.
@@ -91,9 +79,26 @@ These are some resource comparisons using the default yolov8m.pt model on a 30fp
 | Active   | 40-50% in one core       | 628 MB      | Up to 200 Mbps  |
 | Inactive | ~5-7% in one core        | 338 MB      | 0-20 Kbps       |
 
-## Demos
 
-## Object Detection
+## Changes
+
+
+* The existing ROS2 wrapper provides general capabilties to use yolov8 for object detection and other computer vision related task with robotics. However, when deployed on the real-physical autonomous vehicl platform, it is observed that at the task of Simultaneous Localization and Mapping, the moving pedestrians in fron tof the robot makes the SLAM to struggle for localizaing the roboot. The Odometry and SLAM stack is based on RTABMAP. It is also observed that due to localization drifts, the NAV2 stack mistakenly generates off-track plans which the controller server strggles to follow and end uo oscillating.
+
+* To handle the above mentioned scenario, the incoming depth image from the rgbd camera, is masked out in the regions where the objects are dtecetd and tracked by taking tne output dimensions of boudning box from 2D detection node (`yolov8_node.py`). 
+
+* After masking out the regions, the new depth image message is published over the topic named, `/masked_depth`.
+
+* The above is tested by heavily moving infront if the camera and it is observed that the lcoalization drfits are now controlled along with good rgbd odometry (both from RTABMAP) as RTABMAP do no consider the region with zero depth. Further it is tested with NAV2 controller to follow the desired goals.
+
+* For Pedestrain-AV interaction tasks, extracting the pedestrian velocity is viable element to determine their trajectories, to fit the data into models relying on pedestrian behaviour.
+
+The above has been discussed in the main repository with given suggestions, run tests and has been integrated using the Linear Kalman filter approach.
+The full discussion can be found here: `https://github.com/mgonzs13/yolov8_ros/issues/18 `
+
+## Usage
+
+## Object Detection in Gazebo Sim
 
 This is the standard behavior of YOLOv8, which includes object tracking.
 
@@ -101,29 +106,11 @@ This is the standard behavior of YOLOv8, which includes object tracking.
 $ ros2 launch yolov8_bringup yolov8.launch.py
 ```
 
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1gTQt6soSIq1g2QmK7locHDiZ-8MqVl2w)](https://drive.google.com/file/d/1gTQt6soSIq1g2QmK7locHDiZ-8MqVl2w/view?usp=sharing)
+<p align="center">
+  <img src="./docs/peddet_sim.png" width="100%" />
+</p>
 
-## Instance Segmentation
-
-Instance masks are the borders of the detected objects, not the all the pixels inside the masks.
-
-```shell
-$ ros2 launch yolov8_bringup yolov8.launch.py model:=yolov8m-seg.pt
-```
-
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1dwArjDLSNkuOGIB0nSzZR6ABIOCJhAFq)](https://drive.google.com/file/d/1dwArjDLSNkuOGIB0nSzZR6ABIOCJhAFq/view?usp=sharing)
-
-## Human Pose
-
-Online persons are detected along with their keypoints.
-
-```shell
-$ ros2 launch yolov8_bringup yolov8.launch.py model:=yolov8m-pose.pt
-```
-
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1pRy9lLSXiFEVFpcbesMCzmTMEoUXGWgr)](https://drive.google.com/file/d/1pRy9lLSXiFEVFpcbesMCzmTMEoUXGWgr/view?usp=sharing)
-
-## 3D Object Detection
+## 3D Object Detection in real time
 
 The 3D bounding boxes are calculated filtering the depth image data from an RGB-D camera using the 2D bounding box. Only objects with a 3D bounding box are visualized in the 2D image.
 
@@ -131,24 +118,7 @@ The 3D bounding boxes are calculated filtering the depth image data from an RGB-
 $ ros2 launch yolov8_bringup yolov8_3d.launch.py
 ```
 
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1ZcN_u9RB9_JKq37mdtpzXx3b44tlU-pr)](https://drive.google.com/file/d/1ZcN_u9RB9_JKq37mdtpzXx3b44tlU-pr/view?usp=sharing)
+<p align="center">
+  <img src="./docs/Real_time_3Dtracking.png" width="100%" />
+</p>
 
-## 3D Object Detection (Using Instance Segmentation Masks)
-
-In this, the depth image data is filtered using the max and min values obtained from the instance masks. Only objects with a 3D bounding box are visualized in the 2D image.
-
-```shell
-$ ros2 launch yolov8_bringup yolov8_3d.launch.py model:=yolov8m-seg.pt
-```
-
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1wVZgi5GLkAYxv3GmTxX5z-vB8RQdwqLP)](https://drive.google.com/file/d/1wVZgi5GLkAYxv3GmTxX5z-vB8RQdwqLP/view?usp=sharing)
-
-## 3D Human Pose
-
-Each keypoint is projected in the depth image and visualized using purple spheres. Only objects with a 3D bounding box are visualized in the 2D image.
-
-```shell
-$ ros2 launch yolov8_bringup yolov8_3d.launch.py model:=yolov8m-pose.pt
-```
-
-[![](https://drive.google.com/thumbnail?authuser=0&sz=w1280&id=1j4VjCAsOCx_mtM2KFPOLkpJogM0t227r)](https://drive.google.com/file/d/1j4VjCAsOCx_mtM2KFPOLkpJogM0t227r/view?usp=sharing)

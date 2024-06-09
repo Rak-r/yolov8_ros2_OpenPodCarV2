@@ -20,15 +20,23 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
+
+
+
+# remove the 2D detection and tracking node due to dependency of the 3D node on map frame while the 2D detection opearte in camera frame.
+# No need to run two times to avoid node conflicts
+
+
 def generate_launch_description():
 
     #
     # ARGS
     #
+
     model = LaunchConfiguration("model")
     model_cmd = DeclareLaunchArgument(
         "model",
-        default_value="/home/rakshit/yolov8n.pt",
+        default_value="yolov8n.pt",                                            # use nano model to reduce the compuation load
         description="Model name or path")
 
     tracker = LaunchConfiguration("tracker")
@@ -120,36 +128,7 @@ def generate_launch_description():
         default_value="yolo",
         description="Namespace for the nodes")
 
-    #
-    # NODES
-    #
-    # detector_node_cmd = Node(
-    #     package="yolov8_ros",
-    #     executable="yolov8_node",
-    #     name="yolov8_node",
-    #     namespace=namespace,
-    #     parameters=[{
-    #         "model": model,
-    #         "device": device,
-    #         "enable": enable,
-    #         "threshold": threshold,
-    #         "image_reliability": image_reliability,
-    #     }],
-    #     remappings=[("image_raw", input_image_topic)]
-    # )
-
-    # tracking_node_cmd = Node(
-    #     package="yolov8_ros",
-    #     executable="tracking_node",
-    #     name="tracking_node",
-    #     namespace=namespace,
-    #     parameters=[{
-    #         "tracker": tracker,
-    #         "image_reliability": image_reliability
-    #     }],
-    #     remappings=[("image_raw", input_image_topic)]
-    # )
-
+   
     detect_3d_node_cmd = Node(
         package="yolov8_ros",
         executable="detect_3d_node",
@@ -168,6 +147,10 @@ def generate_launch_description():
             ("detections", "tracking")
         ]
     )
+
+
+    # the velocity estimation node is integrated with my following discussion, suggestions and debugging as mentioned here
+    # https://github.com/mgonzs13/yolov8_ros/issues/18 
 
     speed_stimation_node_cmd = Node(
         package="yolov8_ros",
@@ -190,8 +173,6 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    # ld.add_action(model_cmd)
-    # ld.add_action(tracker_cmd)
     ld.add_action(device_cmd)
     ld.add_action(enable_cmd)
     ld.add_action(threshold_cmd)
@@ -205,9 +186,6 @@ def generate_launch_description():
     ld.add_action(target_frame_cmd)
     ld.add_action(maximum_detection_threshold_cmd)
     ld.add_action(namespace_cmd)
-
-    # ld.add_action(detector_node_cmd)
-    # ld.add_action(tracking_node_cmd)
     ld.add_action(detect_3d_node_cmd)
     ld.add_action(speed_stimation_node_cmd)
     ld.add_action(debug_node_cmd)
