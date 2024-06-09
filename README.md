@@ -104,7 +104,7 @@ The full discussion can be found here: https://github.com/mgonzs13/yolov8_ros/is
 Node graph:
 
 <p align="center">
-  <img src="./docs/rqt_graph_yolov8_3d.png" width="100%" />
+  <img src="./Images/rqt_graph_yolov8_3d.png" width="100%" />
 </p>
 
 This is the standard behavior of YOLOv8, which includes object tracking.
@@ -114,7 +114,7 @@ $ ros2 launch yolov8_bringup yolov8.launch.py
 ```
 
 <p align="center">
-  <img src="./docs/peddet_sim.png" width="100%" />
+  <img src="./Images/peddet_sim.png" width="100%" />
 </p>
 
 ## 3D Object Detection in real time
@@ -126,6 +126,6 @@ $ ros2 launch yolov8_bringup yolov8_3d.launch.py
 ```
 
 <p align="center">
-  <img src="./docs/Real_time_3Dtracking.png" width="100%" />
+  <img src="./Images/Real_time_3Dtracking.png" width="100%" />
 </p>
 
