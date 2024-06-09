@@ -100,6 +100,13 @@ The full discussion can be found here: https://github.com/mgonzs13/yolov8_ros/is
 
 ## Object Detection in Gazebo Sim
 
+
+Node graph:
+
+<p align="center">
+  <img src="./docs/rqt_graph_yolov8_3d.png" width="100%" />
+</p>
+
 This is the standard behavior of YOLOv8, which includes object tracking.
 
 ```shell
