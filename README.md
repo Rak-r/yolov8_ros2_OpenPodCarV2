@@ -94,7 +94,7 @@ These are some resource comparisons using the default yolov8m.pt model on a 30fp
 * For Pedestrain-AV interaction tasks, extracting the pedestrian velocity is viable element to determine their trajectories, to fit the data into models relying on pedestrian behaviour.
 
 The above has been discussed in the main repository with given suggestions, run tests and has been integrated using the Linear Kalman filter approach.
-The full discussion can be found here: `https://github.com/mgonzs13/yolov8_ros/issues/18 `
+The full discussion can be found here: https://github.com/mgonzs13/yolov8_ros/issues/18 
 
 ## Usage
 
