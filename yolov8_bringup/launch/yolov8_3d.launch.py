@@ -28,7 +28,7 @@ def generate_launch_description():
     model = LaunchConfiguration("model")
     model_cmd = DeclareLaunchArgument(
         "model",
-        default_value="yolov8m.pt",
+        default_value="/home/rakshit/yolov8n.pt",
         description="Model name or path")
 
     tracker = LaunchConfiguration("tracker")
@@ -58,39 +58,39 @@ def generate_launch_description():
     input_image_topic = LaunchConfiguration("input_image_topic")
     input_image_topic_cmd = DeclareLaunchArgument(
         "input_image_topic",
-        default_value="/camera/rgb/image_raw",
+        default_value="/camera/color/image_raw",
         description="Name of the input image topic")
 
     image_reliability = LaunchConfiguration("image_reliability")
     image_reliability_cmd = DeclareLaunchArgument(
         "image_reliability",
-        default_value="2",
+        default_value="1",
         choices=["0", "1", "2"],
         description="Specific reliability QoS of the input image topic (0=system default, 1=Reliable, 2=Best Effort)")
 
     input_depth_topic = LaunchConfiguration("input_depth_topic")
     input_depth_topic_cmd = DeclareLaunchArgument(
         "input_depth_topic",
-        default_value="/camera/depth/image_raw",
+        default_value="/depth",
         description="Name of the input depth topic")
 
     depth_image_reliability = LaunchConfiguration("depth_image_reliability")
     depth_image_reliability_cmd = DeclareLaunchArgument(
         "depth_image_reliability",
-        default_value="2",
+        default_value="1",
         choices=["0", "1", "2"],
         description="Specific reliability QoS of the input depth image topic (0=system default, 1=Reliable, 2=Best Effort)")
 
     input_depth_info_topic = LaunchConfiguration("input_depth_info_topic")
     input_depth_info_topic_cmd = DeclareLaunchArgument(
         "input_depth_info_topic",
-        default_value="/camera/depth/camera_info",
+        default_value="/depth_camera_info",
         description="Name of the input depth info topic")
 
     depth_info_reliability = LaunchConfiguration("depth_info_reliability")
     depth_info_reliability_cmd = DeclareLaunchArgument(
         "depth_info_reliability",
-        default_value="2",
+        default_value="1",
         choices=["0", "1", "2"],
         description="Specific reliability QoS of the input depth info topic (0=system default, 1=Reliable, 2=Best Effort)")
 
@@ -104,7 +104,7 @@ def generate_launch_description():
     target_frame = LaunchConfiguration("target_frame")
     target_frame_cmd = DeclareLaunchArgument(
         "target_frame",
-        default_value="base_link",
+        default_value="map",
         description="Target frame to transform the 3D boxes")
 
     maximum_detection_threshold = LaunchConfiguration(
@@ -123,32 +123,32 @@ def generate_launch_description():
     #
     # NODES
     #
-    detector_node_cmd = Node(
-        package="yolov8_ros",
-        executable="yolov8_node",
-        name="yolov8_node",
-        namespace=namespace,
-        parameters=[{
-            "model": model,
-            "device": device,
-            "enable": enable,
-            "threshold": threshold,
-            "image_reliability": image_reliability,
-        }],
-        remappings=[("image_raw", input_image_topic)]
-    )
+    # detector_node_cmd = Node(
+    #     package="yolov8_ros",
+    #     executable="yolov8_node",
+    #     name="yolov8_node",
+    #     namespace=namespace,
+    #     parameters=[{
+    #         "model": model,
+    #         "device": device,
+    #         "enable": enable,
+    #         "threshold": threshold,
+    #         "image_reliability": image_reliability,
+    #     }],
+    #     remappings=[("image_raw", input_image_topic)]
+    # )
 
-    tracking_node_cmd = Node(
-        package="yolov8_ros",
-        executable="tracking_node",
-        name="tracking_node",
-        namespace=namespace,
-        parameters=[{
-            "tracker": tracker,
-            "image_reliability": image_reliability
-        }],
-        remappings=[("image_raw", input_image_topic)]
-    )
+    # tracking_node_cmd = Node(
+    #     package="yolov8_ros",
+    #     executable="tracking_node",
+    #     name="tracking_node",
+    #     namespace=namespace,
+    #     parameters=[{
+    #         "tracker": tracker,
+    #         "image_reliability": image_reliability
+    #     }],
+    #     remappings=[("image_raw", input_image_topic)]
+    # )
 
     detect_3d_node_cmd = Node(
         package="yolov8_ros",
@@ -169,6 +169,13 @@ def generate_launch_description():
         ]
     )
 
+    speed_stimation_node_cmd = Node(
+        package="yolov8_ros",
+        executable="speed_stimation_node",
+        name="speed_stimation_node",
+        namespace=namespace,
+    )
+
     debug_node_cmd = Node(
         package="yolov8_ros",
         executable="debug_node",
@@ -177,14 +184,14 @@ def generate_launch_description():
         parameters=[{"image_reliability": image_reliability}],
         remappings=[
             ("image_raw", input_image_topic),
-            ("detections", "detections_3d")
+            ("detections", "detections_speed")
         ]
     )
 
     ld = LaunchDescription()
 
-    ld.add_action(model_cmd)
-    ld.add_action(tracker_cmd)
+    # ld.add_action(model_cmd)
+    # ld.add_action(tracker_cmd)
     ld.add_action(device_cmd)
     ld.add_action(enable_cmd)
     ld.add_action(threshold_cmd)
@@ -199,9 +206,10 @@ def generate_launch_description():
     ld.add_action(maximum_detection_threshold_cmd)
     ld.add_action(namespace_cmd)
 
-    ld.add_action(detector_node_cmd)
-    ld.add_action(tracking_node_cmd)
+    # ld.add_action(detector_node_cmd)
+    # ld.add_action(tracking_node_cmd)
     ld.add_action(detect_3d_node_cmd)
+    ld.add_action(speed_stimation_node_cmd)
     ld.add_action(debug_node_cmd)
 
     return ld
