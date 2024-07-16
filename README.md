@@ -97,7 +97,11 @@ $ ros2 launch yolov8_bringup yolov8.launch.py
 
 ### Pedestrian viewed in Sim while Mapping and Navigating
 
-https://github.com/Rak-r/yolov8_ros2_OpenPodCarV2/raw/main/Images/Peddet_sim.mp4
+
+
+https://github.com/user-attachments/assets/4652f100-a039-424f-b578-13bb4a2280ad
+
+
 
 
 ## 3D Object Detection in real time
