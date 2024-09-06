@@ -2,6 +2,26 @@
 
 ROS 2 wrap for [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) to perform object detection and tracking, instance segmentation and human pose estimation. There are also 3D versions of object detection and human pose estimation based on depth images.
 
+#### This repo uses only object detection and tracking.
+
+# Changes from the original repository
+
+
+* The existing ROS2 wrapper provides general capabilties to use yolov8 for object detection and other computer vision related task with robotics. However, when deployed on the real-physical autonomous vehicl platform, it is observed that at the task of Simultaneous Localization and Mapping, the moving pedestrians in fron tof the robot makes the SLAM to struggle for localizaing the roboot. The Odometry and SLAM stack is based on RTABMAP. It is also observed that due to localization drifts, the NAV2 stack mistakenly generates off-track plans which the controller server strggles to follow and end uo oscillating.
+
+* To handle the above mentioned scenario, the incoming depth image from the rgbd camera, is masked out in the regions where the objects are dtecetd and tracked by taking tne output dimensions of boudning box from 2D detection node (`yolov8_node.py`). 
+
+* After masking out the regions, the new depth image message is published over the topic named, `/masked_depth`.
+
+* The above is tested by heavily moving infront if the camera and it is observed that the lcoalization drfits are now controlled along with good rgbd odometry (both from RTABMAP) as RTABMAP do no consider the region with zero depth. Further it is tested with NAV2 controller to follow the desired goals.
+
+* For Pedestrain-AV interaction tasks, extracting the pedestrian velocity is viable element to determine their trajectories, to fit the data into models relying on pedestrian behaviour.
+
+The above has been discussed in the main repository with given suggestions, run tests and has been integrated using the Linear Kalman filter approach.
+The full discussion can be found here: https://github.com/mgonzs13/yolov8_ros/issues/18 
+
+
+
 ## Installation
 
 ```shell
@@ -56,22 +76,6 @@ $ colcon build
 - **target_frame**: frame to transform the 3D boxes (default: base_link)
 - **maximum_detection_threshold**: maximum detection threshold in the z axis (default: 0.3)
 
-
-## Changes
-
-
-* The existing ROS2 wrapper provides general capabilties to use yolov8 for object detection and other computer vision related task with robotics. However, when deployed on the real-physical autonomous vehicl platform, it is observed that at the task of Simultaneous Localization and Mapping, the moving pedestrians in fron tof the robot makes the SLAM to struggle for localizaing the roboot. The Odometry and SLAM stack is based on RTABMAP. It is also observed that due to localization drifts, the NAV2 stack mistakenly generates off-track plans which the controller server strggles to follow and end uo oscillating.
-
-* To handle the above mentioned scenario, the incoming depth image from the rgbd camera, is masked out in the regions where the objects are dtecetd and tracked by taking tne output dimensions of boudning box from 2D detection node (`yolov8_node.py`). 
-
-* After masking out the regions, the new depth image message is published over the topic named, `/masked_depth`.
-
-* The above is tested by heavily moving infront if the camera and it is observed that the lcoalization drfits are now controlled along with good rgbd odometry (both from RTABMAP) as RTABMAP do no consider the region with zero depth. Further it is tested with NAV2 controller to follow the desired goals.
-
-* For Pedestrain-AV interaction tasks, extracting the pedestrian velocity is viable element to determine their trajectories, to fit the data into models relying on pedestrian behaviour.
-
-The above has been discussed in the main repository with given suggestions, run tests and has been integrated using the Linear Kalman filter approach.
-The full discussion can be found here: https://github.com/mgonzs13/yolov8_ros/issues/18 
 
 ## Usage
 
